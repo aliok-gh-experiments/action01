@@ -20,7 +20,8 @@ on:
 #  # If this is enabled it will cancel current running and start latest
 #  cancel-in-progress: false
 
-#env:
+env:
+  GH_TOKEN: ${{ github.token }}
 #  # workflow related
 #  BRANCH_NAME: 100-focus-project-candidate-search
 #  ACTIONS_RUNNER_DEBUG: ${{ secrets.ACTIONS_RUNNER_DEBUG }}
