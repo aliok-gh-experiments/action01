@@ -1,0 +1,89 @@
+name: Test01
+
+#permissions:
+#  contents: write
+#  pull-requests: write
+
+on:
+#  # run periodically
+#  schedule:
+#    - cron: '1,21,41 * * * *'   # at :01, :21, :41 past every hour every day
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+# do not run this workflow, when there's another instance is running for the same workflow
+#concurrency:
+#  group: 100-focus-project-candidate-search
+#  # If this is enabled it will cancel current running and start latest
+#  cancel-in-progress: false
+
+#env:
+#  # workflow related
+#  BRANCH_NAME: 100-focus-project-candidate-search
+#  ACTIONS_RUNNER_DEBUG: ${{ secrets.ACTIONS_RUNNER_DEBUG }}
+#  # cuttlecat related
+#  SEARCH_DATA_DIRECTORY: ${{ github.workspace }}/100-focus-project-candidate-search
+#  EXTRACT_DATA_DIRECTORY: ${{ github.workspace }}/200-focus-project-extract
+#  INTERVAL_CAP: 7
+#  RENEW_PERIOD_IN_DAYS: 30
+
+jobs:
+  test01:
+    name: test01
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
+      - name: Show default environment variables
+        run: |
+          echo "The job_id is: $GITHUB_JOB"   # reference the default environment variables
+          echo "The id of this action is: $GITHUB_ACTION"   # reference the default environment variables
+          echo "The run id is: $GITHUB_RUN_ID"
+          echo "The GitHub Actor's username is: $GITHUB_ACTOR"
+          echo "GitHub SHA: $GITHUB_SHA"
+
+      - env:
+          EVENT_CONTEXT: ${{ toJSON(github.event) }}
+        run: |
+          echo $EVENT_CONTEXT
+
+      - uses: actions/checkout@v4
+
+#      - env:
+#          GH_TOKEN: ${{ secrets.MY_TOKEN }}
+#          ISSUE_URL: ${{ github.event.issue.html_url }}
+#        run: |
+#          gh issue edit $ISSUE_URL --add-label "triage"
+
+      - name: Print person
+        run: |
+          echo "${{ github.workspace }}"
+          cat "${{ github.workspace }}/foo/bar/test.txt"
+          cat ./foo/bar/test.txt
