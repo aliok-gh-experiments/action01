@@ -87,3 +87,42 @@ jobs:
           echo "${{ github.workspace }}"
           cat "${{ github.workspace }}/foo/bar/test.txt"
           cat ./foo/bar/test.txt
+
+      - name: Print approvers
+        run: |
+          echo "All reviewers"
+          gh pr view 1 --json reviews  --jq '.reviews.[] | {user: .author.login, commit: .commit.oid, state: .state}'
+          
+          echo "Reviews from a person"
+          gh pr view 1 --json reviews  --jq '.reviews.[] | select(.author.login == "zeynepizelok")' 
+          gh pr view 1 --json reviews  --jq '.reviews.[] | select(.author.login == "zeynepizelok") | {user: .author.login, commit: .commit.oid, state: .state}'
+          
+          echo "Reviews from a person with state=APPROVED"
+          gh pr view 1 --json reviews  --jq '.reviews.[] | select(.author.login == "zeynepizelok" and .state == "APPROVED")'
+          
+          echo "Latest commit in the PR"
+          gh pr view 1 --json headRefOid
+          
+          HEAD_REF_OID=$(gh pr view 1 --json headRefOid --jq '.headRefOid')
+          echo "HEAD_REF_OID: $HEAD_REF_OID"
+          
+          echo "Reviews from a person with state=APPROVED and commit=HEAD_REF_OID"
+          gh pr view 1 --json reviews | jq '.reviews.[] | select(.author.login == "zeynepizelok" and .state == "APPROVED" and .commit.oid == $HEAD_REF_OID)' --arg HEAD_REF_OID "$HEAD_REF_OID"
+
+      - name: Print if person in the file approved
+        run: |
+          PERSON=$(cat ./foo/bar/test.txt)
+          echo "PERSON: $PERSON"
+          HEAD_REF_OID=$(gh pr view 1 --json headRefOid --jq '.headRefOid')
+          echo "HEAD_REF_OID: $HEAD_REF_OID"
+          APPROVAL_COUNT=$(gh pr view 1 --json reviews | jq '[.reviews.[] | select(.author.login == "zeynepizelok" and .state == "APPROVED" and .commit.oid == $HEAD_REF_OID)]' --arg HEAD_REF_OID "$HEAD_REF_OID" | jq length)
+          echo "APPROVAL_COUNT: $APPROVAL_COUNT"
+          if [ $APPROVAL_COUNT -gt 0 ]; then
+              echo "Approved"
+          else
+              echo "Not approved"
+              exit 1
+          fi
+          
+          
+          
